@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Анимированные ролики с нейросетями</title>
+<meta name="description" content="Курс на 4 недели: анимированные шортсы с Claude — от идеи и хука до конвейера 1–2 роликов в день, портфолио и предложений клиентам. Доход не обещаем.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  :root {
+    --bg: #0b1216; --panel: #121d22; --line: #24343b; --fg: #e9eff1; --muted: #97a8ae;
+    --accent: #ffb85c; --red: #ff5a4e; --green: #4fd38a;
+    --display: 'Unbounded', 'Arial Black', system-ui, sans-serif;
+    --body: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 18px/1.6 var(--body); padding: 0 16px; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 0 96px; display: grid; gap: 96px; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+  h1 { font-size: clamp(30px, 5.4vw, 68px); line-height: 1.06; font-weight: 900; }
+  h2 { font-size: clamp(24px, 3.6vw, 44px); line-height: 1.12; }
+  h3 { font-size: 19px; line-height: 1.3; }
+  p { margin: 0; max-width: 70ch; }
+  section { display: grid; gap: 26px; }
+  .muted { color: var(--muted); }
+  .eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .eyebrow b { color: var(--red); }
+  .src { font-size: 13px; color: var(--muted); }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px; letter-spacing: .1em; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+  .top nav { display: flex; gap: 18px; flex-wrap: wrap; }
+  .top a { color: var(--muted); text-decoration: none; } .top a:hover { color: var(--fg); }
+
+  .hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; align-items: center; }
+  .hero-copy { display: grid; gap: 24px; min-width: 0; }
+  .lead { font-size: 20px; color: var(--muted); } .lead strong { color: var(--fg); }
+  .phones { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 560px; width: 100%; justify-self: end; }
+  .phone { margin: 0; position: relative; aspect-ratio: 9/16; border-radius: 22px; overflow: hidden; border: 1px solid var(--line); background: #000; }
+  .phone:nth-child(2) { transform: translateY(36px); }
+  .phone video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .phone figcaption { position: absolute; left: 10px; bottom: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; background: rgba(5,10,12,.8); padding: 4px 8px; border-radius: 6px; }
+  .cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .btn { font-family: var(--display); font-weight: 700; font-size: 16px; background: var(--accent); color: #1b1106; border-radius: 14px; padding: 16px 24px; text-decoration: none; display: inline-block; }
+  .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+
+  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .facts div { border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; display: grid; gap: 4px; min-width: 0; }
+  .facts b { font-family: var(--display); font-size: clamp(26px, 3.2vw, 40px); color: var(--accent); font-variant-numeric: tabular-nums; }
+  .facts span { color: var(--muted); font-size: 15px; }
+
+  .weeks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .week { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 22px; display: grid; gap: 12px; grid-template-rows: auto 1fr auto; min-width: 0; }
+  .week .when { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+  .week ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; line-height: 1.45; }
+  .week .res { font-size: 14px; background: #0c171b; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .week .res b { display: block; color: var(--green); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; }
+
+  .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 640px; }
+  th, td { text-align: left; vertical-align: top; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  thead th { font-family: var(--display); font-size: 14px; }
+  tr:last-child td { border-bottom: 0; }
+  td.hl, th.hl { background: rgba(255,184,92,.08); }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .card ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 15px; }
+  .card.yes h3 { color: var(--green); } .card.no h3 { color: var(--red); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .prices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .price { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 24px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .price.main { border-color: var(--accent); }
+  .price .when { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+  .price .sum { font-family: var(--display); font-size: 34px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .price ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 15px; }
+  .price .why { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+
+  .honest { border-left: 3px solid var(--accent); padding-left: 16px; display: grid; gap: 8px; }
+  footer { border-top: 1px solid var(--line); padding-top: 20px; font-size: 14px; color: var(--muted); display: grid; gap: 8px; }
+
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; }
+    .phones { justify-self: start; }
+    .facts, .weeks { grid-template-columns: 1fr 1fr; }
+    .grid3, .prices { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .wrap { gap: 72px; }
+    .facts, .weeks, .two { grid-template-columns: 1fr; }
+    .phone:nth-child(2) { transform: translateY(24px); }
+    .lead { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span>АНИМИРОВАННЫЕ РОЛИКИ · КУРС 4 НЕДЕЛИ</span>
+    <nav><a href="#program">Программа</a><a href="#price">Цена</a><a href="https://t.me/f0tys" target="_blank" rel="noopener">Telegram</a></nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow"><b>●</b> для авторов · без лица в кадре · без навыков анимации</p>
+      <h1>Анимированные шортсы с нейросетями: <span style="color:var(--accent)">от идеи до конвейера и первых клиентов</span></h1>
+      <p class="lead">За месяц вы запускаете канал коротких анимированных роликов — истории выживания, «что будет, если…», объяснялки про деньги и науку. <strong>Claude пишет сценарий, ElevenLabs озвучивает, Claude Code собирает видео.</strong> К четвёртой неделе у вас — конвейер на 1–2 ролика в день, портфолио из своего канала и 20 отправленных предложений клиентам. Сколько из них ответят, зависит от вас и рынка — мы учим, как повысить шансы.</p>
+      <div class="cta">
+        <a class="btn" href="#price">Выбрать формат</a>
+        <a class="btn ghost" href="#program">Смотреть программу</a>
+        <a class="btn ghost" href="https://t.me/f0tys?text=%D0%92%D0%BE%D0%BF%D1%80%D0%BE%D1%81%20%D0%BF%D1%80%D0%BE%20%D0%BA%D1%83%D1%80%D1%81%20%C2%AB%D0%90%D0%BD%D0%B8%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5%20%D1%80%D0%BE%D0%BB%D0%B8%D0%BA%D0%B8%C2%BB" target="_blank" rel="noopener">Задать вопрос</a>
+      </div>
+    </div>
+    <div class="phones">
+      <figure class="phone"><video src="demo_lift.mp4" poster="poster_lift.jpg" muted loop playsinline autoplay preload="metadata"></video><figcaption>«ЛИФТ» Ч.1 · 47 533 ПРОСМОТРА</figcaption></figure>
+      <figure class="phone"><video src="demo_train.mp4" poster="poster_train.jpg" muted loop playsinline autoplay preload="metadata"></video><figcaption>«ПОЕЗД №9» · НАШ СЕРИАЛ</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">наши цифры · YouTube Studio и TikTok Studio · снимок 05.11.2026</p>
+    <h2>Курс написан по каналу, который мы ведём сами</h2>
+    <div class="facts">
+      <div><b>415 000+</b><span>просмотров: YouTube 194 070 за 28 дней + TikTok ≈ 221 000 по сериям с 23.10</span></div>
+      <div><b>156 000</b><span>у лучшего ролика: «Выброс» целиком, TikTok, 3:53</span></div>
+      <div><b>68%</b><span>зрителей на 3-й секунде у этого ролика (у слабых — 36%)</span></div>
+      <div><b>+770</b><span>подписчиков на YouTube за 28 дней</span></div>
+    </div>
+    <p class="src">Ещё: YouTube «Выброс» ч.1 — 58 339 просмотров (средний просмотр 64,5%), «Лифт» ч.1 — 47 533 (68,1%). Неудачи тоже в курсе: отдельный рекламный ролик набрал 1 100 просмотров.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">почему так</p>
+    <h2>Главное в шортсе — первые 3 секунды и тайна, а не дорогая графика</h2>
+    <div class="grid3">
+      <div class="card"><h3>Хук решает судьбу ролика</h3><p class="muted">Больше всего зрителей уходит в первые 2–3 секунды. Разница между нашим лучшим и худшим стартом — почти вдвое: 68% и 36% зрителей на 3-й секунде (TikTok Studio, 02.11.2026). В курсе 6 формул хука и тест из 5 вопросов.</p></div>
+      <div class="card"><h3>После 10 секунд держит тайна</h3><p class="muted">У сериала «Лифт» кривая после 10-й секунды почти ровная: 39% → 30% к 30-й (TikTok Studio, 02.11.2026). Учим строить одну тайну на ролик и сериалы с клиффхэнгерами.</p></div>
+      <div class="card"><h3>Конвейер, а не ручная сборка</h3><p class="muted">Ролик — это данные: текст, голос и список сцен. Claude Code собирает видео в Remotion по вашему шаблону — 30–60 минут на ролик после настройки.</p></div>
+    </div>
+  </section>
+
+  <section id="program">
+    <p class="eyebrow">программа · 24 урока · 4 итоговых задания</p>
+    <h2>Четыре недели — четыре результата</h2>
+    <div class="weeks">
+      <div class="week"><span class="when">Неделя 1</span><h3>Ниша, формат и первый ролик</h3><ol><li>Как устроен вирусный шортс</li><li>Ниша, формат и площадки</li><li>Разбор лидеров по секундам</li><li>Инструменты и установка</li><li>Первый ролик за день</li><li>Оформление канала</li></ol><div class="res"><b>ИТОГ</b>Канал оформлен, 3 ролика опубликованы</div></div>
+      <div class="week"><span class="when">Неделя 2</span><h3>Сценарий, хук и удержание</h3><ol><li>Шесть формул хука</li><li>Тайна, повороты, ставки</li><li>Серии и клиффхэнгеры</li><li>Сценарий с нейросетью</li><li>Голос, звук, субтитры</li><li>Кривая удержания</li></ol><div class="res"><b>ИТОГ</b>Серия 3–5 частей + сборник, разбор удержания</div></div>
+      <div class="week"><span class="when">Неделя 3</span><h3>Конвейер: 1–2 ролика в день</h3><ol><li>Ролик как данные</li><li>Персонажи и мир</li><li>Скилл канала и пакетный рендер</li><li>Сборники и переводы</li><li>Расписание и автопубликация</li><li>Аналитика раз в неделю</li></ol><div class="res"><b>ИТОГ</b>7+ роликов за неделю, расписание вперёд</div></div>
+      <div class="week"><span class="when">Неделя 4</span><h3>Деньги</h3><ol><li>Карта монетизации 2026</li><li>Реклама и маркировка</li><li>Услуги: пакеты и прайс</li><li>Портфолио из канала</li><li>Первая продажа</li><li>Итоги и план месяца 2</li></ol><div class="res"><b>ИТОГ</b>Прайс и портфолио готовы, 20 предложений клиентам отправлены</div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">что внутри</p>
+    <h2>Материалы, которые остаются у вас</h2>
+    <div class="grid3">
+      <div class="card"><h3>24 урока</h3><p class="muted">Теория простым языком, «до/после», таблицы, типичные ошибки, практика со временем и «Проверьте себя».</p></div>
+      <div class="card"><h3>30 промптов</h3><p class="muted">Идеи, хуки, сценарии, серии, озвучка, описания, перевод, анализ удержания, сообщения клиентам.</p></div>
+      <div class="card"><h3>3 стартовых шаблона</h3><p class="muted">«Если… — не…», «Что будет, если…», «Афоризм» — со структурой по секундам и задачей для Claude Code.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">как делаем ролики · исследование 08.11.2026</p>
+    <h2>Основной путь и запасные</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Путь</th><th>Как</th><th>Время на ролик</th><th>Расходы в месяц</th></tr></thead>
+      <tbody>
+        <tr><td class="hl"><b>Основной</b></td><td class="hl">Claude → голос ElevenLabs → видео в Remotion через Claude Code</td><td class="hl">30–60 мин после настройки</td><td class="hl">Claude Pro ≈ $20 + ElevenLabs $6–22</td></tr>
+        <tr><td>Запасной А</td><td>Сборка вручную в CapCut</td><td>1,5–2 ч</td><td>0–$20 + голос</td></tr>
+        <tr><td>Запасной Б</td><td>Генеративные картинки и видео для отдельных кадров</td><td>1–3 ч</td><td>$50–300+</td></tr>
+      </tbody>
+    </table></div>
+    <p class="src">Цены сервисов — по обзорам октября 2026 (<a href="https://bigvu.tv/blog/elevenlabs-pricing-2026-plans-credits-commercial-rights-api-costs/" target="_blank" rel="noopener">ElevenLabs</a>, <a href="https://invideo.io/blog/kling-3-vs-veo-3-1/" target="_blank" rel="noopener">Kling/Veo</a>). Remotion бесплатен для частных лиц и команд до 3 человек (<a href="https://github.com/remotion-dev/remotion/blob/main/LICENSE.md" target="_blank" rel="noopener">лицензия</a>).</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">честно о деньгах</p>
+    <h2>Доход не обещаем — учим навыку и системе</h2>
+    <div class="honest">
+      <p>Автору из России партнёрские программы YouTube и TikTok недоступны: AdSense для России отключён в августе 2024 (<a href="https://www.bleepingcomputer.com/news/google/google-deactivates-russian-adsense-accounts-sends-final-payments/" target="_blank" rel="noopener">BleepingComputer</a>), YouTube в России заблокирован с февраля 2026 (<a href="https://en.wikipedia.org/wiki/Blocking_of_YouTube_in_Russia" target="_blank" rel="noopener">сводка</a>), TikTok с 2022 года ограничивает новые публикации из России. Обходу блокировок курс не учит: для аудитории в России работаем с VK Клипами, VK Видео и Rutube. Поэтому первая модель заработка в курсе — <strong>ролики на заказ</strong>: исполнители на fl.ru указывают за 2D-ролик до 30 секунд типично 6 500–50 000 ₽ (<a href="https://www.fl.ru/uslugi-freelancera/moushn-dizain/" target="_blank" rel="noopener">каталог fl.ru, 08.11.2026</a>) — это рыночные цены, а не обещание вашего дохода. Плюс VK Видео (с 01.09.2026 — от 1 000 подписчиков и 500 часов за 90 дней, <a href="https://ppc.world/news/vk-video-rasshirit-programmu-monetizacii-s-1-sentyabrya/" target="_blank" rel="noopener">ppc.world</a>), Rutube и реклама с маркировкой erid.</p>
+      <p class="muted">Для авторов из других стран — актуальные пороги YouTube Partner Program и TikTok Creator Rewards. В курсе нет азартных игр, крипто-схем и рекламы VPN: реклама VPN в России штрафуется с 01.09.2025 (<a href="https://www.vedomosti.ru/media/articles/2026/01/27/1172111-fas-vinesla-pervoe" target="_blank" rel="noopener">первое решение ФАС, январь 2026</a>).</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="two">
+      <div class="card yes"><h3>Подходит, если вы</h3><ul><li>готовы тратить 1,5–2 часа в день месяц подряд;</li><li>хотите канал без лица в кадре или навык делать ролики на заказ;</li><li>не программист — код пишет Claude Code, вы ставите задачу и проверяете.</li></ul></div>
+      <div class="card no"><h3>Не подходит, если вы</h3><ul><li>ждёте пассивный доход без работы;</li><li>хотите перезаливать чужие ролики или копировать чужие сюжеты;</li><li>планируете контент про азартные игры, ставки или крипто-схемы.</li></ul></div>
+    </div>
+  </section>
+
+  <section id="price">
+    <p class="eyebrow">цена · три формата</p>
+    <h2>Выберите, сколько поддержки вам нужно</h2>
+    <div class="prices">
+      <div class="price"><span class="when">Самостоятельно</span><div class="sum">4 900 ₽</div><ul><li>Все 24 урока, 30 промптов, 3 шаблона</li><li>Обновления материалов</li></ul><p class="why">Почему так: только материалы, без нашего времени. Это цена одного недорогого 30-секундного ролика у исполнителя на fl.ru (типично от 6 500 ₽, 2026). Окупится ли курс, зависит от вас — доход не обещаем.</p><a class="btn" href="https://t.me/f0tys?text=%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%BA%D1%83%D1%80%D1%81%20%C2%AB%D0%90%D0%BD%D0%B8%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5%20%D1%80%D0%BE%D0%BB%D0%B8%D0%BA%D0%B8%C2%BB%3A%20%D0%A1%D0%B0%D0%BC%D0%BE%D1%81%D1%82%D0%BE%D1%8F%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D0%BE" target="_blank" rel="noopener" style="justify-self:start">Записаться в Telegram</a></div>
+      <div class="price main"><span class="when">С проверкой заданий</span><div class="sum">14 900 ₽</div><ul><li>Всё из «Самостоятельно»</li><li>Проверка 4 итоговых заданий с правками</li><li>Чат в Telegram, ответ в течение дня</li></ul><p class="why">Почему так: вы платите за наше время — разбор 4 итоговых заданий с правками и ответы в чате 4 недели (по нашей оценке, 8–10 часов работы). Главный риск курса — бросить на неделе 1–2, а обратная связь держит ритм.</p><a class="btn" href="https://t.me/f0tys?text=%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%BA%D1%83%D1%80%D1%81%20%C2%AB%D0%90%D0%BD%D0%B8%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5%20%D1%80%D0%BE%D0%BB%D0%B8%D0%BA%D0%B8%C2%BB%3A%20%D0%A1%20%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%BE%D0%B9%20%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D0%B9" target="_blank" rel="noopener" style="justify-self:start">Записаться в Telegram</a></div>
+      <div class="price"><span class="when">Наставничество 1-на-1</span><div class="sum">30 000 ₽</div><ul><li>Всё из «С проверкой»</li><li>4 созвона по 60 минут</li><li>Разбор каждого ролика до публикации</li><li>Помощь с первым клиентом</li></ul><p class="why">Почему так: это личное время автора — 4 часа созвонов, разбор каждого ролика до публикации и помощь с первым предложением клиенту. Мест мало: берём столько учеников, сколько успеваем разобрать. Цена совпадает с нашим месячным наставничеством «Контент-завод на Claude» (30 000 ₽).</p><a class="btn" href="https://t.me/f0tys?text=%D0%A5%D0%BE%D1%87%D1%83%20%D0%BD%D0%B0%20%D0%BA%D1%83%D1%80%D1%81%20%C2%AB%D0%90%D0%BD%D0%B8%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5%20%D1%80%D0%BE%D0%BB%D0%B8%D0%BA%D0%B8%C2%BB%3A%20%D0%9D%D0%B0%D1%81%D1%82%D0%B0%D0%B2%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D1%82%D0%B2%D0%BE%201-%D0%BD%D0%B0-1" target="_blank" rel="noopener" style="justify-self:start">Записаться в Telegram</a></div>
+    </div>
+    <p class="muted">Оплата — после короткого разговора в Telegram <a href="https://t.me/f0tys" target="_blank" rel="noopener">@f0tys</a>: ответим на вопросы, проверим, подойдут ли вам инструменты, и пришлём ссылку на оплату.</p>
+    <p class="src">Отдельно вы оплачиваете инструменты: Claude Pro ≈ $20/мес и ElevenLabs от $6/мес (цены на октябрь 2026, <a href="https://bigvu.tv/blog/elevenlabs-pricing-2026-plans-credits-commercial-rights-api-costs/" target="_blank" rel="noopener">обзор</a>). Это зарубежные сервисы: они работают не во всех странах и не принимают российские карты (<a href="https://www.anthropic.com/supported-countries" target="_blank" rel="noopener">страны Claude</a>). Если они вам недоступны, курс проходится по запасному пути — свой голос и сборка в CapCut. При отказе от курса деньги возвращаются за вычетом уже оказанных услуг (ст. 32 Закона «О защите прав потребителей»).</p>
+  </section>
+
+  <footer>
+    <p>Все цифры — с источником и датой. Наши — из YouTube Studio и TikTok Studio (снимок 05.11.2026), рыночные — по ссылкам. Правила площадок меняются: курс обновляется.</p>
+    <p>Материалы курса — 24 урока, библиотека промптов и шаблоны — выдаются после записи. Связь:<a href="https://t.me/f0tys" target="_blank" rel="noopener">Telegram @f0tys</a></p>
+  </footer>
+</div>
+</body>
+</html>
